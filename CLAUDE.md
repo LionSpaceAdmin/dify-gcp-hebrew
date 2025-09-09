@@ -4,78 +4,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Autonomous Dify.ai Deployment on Google Cloud Platform**
+**Autonomous Dify.ai Deployment with Vertex AI Integration**
 
-This project deploys Dify.ai (an open-source LLM application platform) on Google Cloud Platform with Hebrew language support and Vertex AI integration. It combines:
+This project implements a complete Dify.ai deployment on Google Cloud Platform with Hebrew language support and Vertex AI integration. The system combines automated deployment, browser testing, and AI orchestration.
 
-- **Primary Goal**: Full production deployment of Dify.ai on GCP with Hebrew RTL support
-- **Multi-Agent System**: LangGraph-based orchestrator with 4 specialized agents (Planner, Researcher, Coder, Reviewer)
-- **Deployment Approaches**: Both Docker-based containerization and direct macOS installation
-- **Automation**: Playwright browser automation with persistent Hebrew-configured sessions
-- **Progress Tracking**: HTML-based visual tracking system with RTL Hebrew layout
-
-## Architecture
-
-The project employs a multi-layered architecture:
-
-### Core Components
-1. **Dify Platform** (`dify/` directory): Full Dify.ai source code
-   - Backend API: Python Flask with Domain-Driven Design
-   - Frontend Web: Next.js with TypeScript and Hebrew i18n
-   - Database: PostgreSQL with pgvector extension for embeddings
-   - Cache/Queue: Redis for session management and background jobs
-
-2. **Multi-Agent Orchestrator** (`agents_orchestrator.py`): 
-   - LangGraph-based workflow coordination
-   - 4 specialized agents with shared state management
-   - Anthropic Claude integration for decision making
-
-3. **Deployment Infrastructure**:
-   - Docker Compose with Hebrew database collation
-   - GCP deployment configurations (Cloud Run, Cloud SQL, Secret Manager)
-   - Terraform infrastructure as code (planned)
-
-4. **Testing & Automation**:
-   - Playwright configuration with Hebrew locale (he-IL)
-   - Persistent browser sessions with automatic Dify navigation
-   - Visual progress tracking with timeline interface
-
-### GCP Integration Strategy
-- **Vertex AI**: Primary LLM provider (Gemini Pro/Flash models)
-- **Cloud Run**: Multi-service container deployment
-- **Cloud SQL**: Managed PostgreSQL with pgvector
-- **Cloud Storage**: Document and file management
-- **Secret Manager**: Secure credential storage
-- **Cloud Armor**: WAF protection
+Key components:
+- **Dify Platform**: Full Dify.ai source with Hebrew RTL support
+- **Vertex AI Integration**: Complete Google Cloud Vertex AI provider with Hebrew-optimized Gemini models
+- **Multi-Agent Orchestrator**: LangGraph-based system with 4 specialized agents
+- **Browser Automation**: Playwright-based testing with Hebrew locale configuration
+- **Visual Progress Tracking**: HTML dashboard with RTL Hebrew layout
 
 ## Development Commands
 
-### Docker-Based Development
+### Container Development (Docker)
 
 ```bash
-# Start core infrastructure
-./start-dev.sh                              # Automated setup script
+# Automated startup with Hebrew/Vertex AI support
+./start-dev.sh                               # Start core services (DB + Redis)
 
-# Manual service management
-docker-compose -f docker-compose.dev.yaml up -d db redis  # Core services
-docker-compose -f docker-compose.dev.yaml up -d           # All services
+# Manual service management  
+docker compose -f docker-compose.dev.yaml up -d db redis    # Core only
+docker compose -f docker-compose.dev.yaml up -d             # All services
+
+# Service-specific startup
+docker compose -f docker-compose.dev.yaml up -d api         # API server
+docker compose -f docker-compose.dev.yaml up -d worker      # Background worker  
+docker compose -f docker-compose.dev.yaml up -d web         # Frontend
 
 # Health checks
-curl http://localhost                        # Web interface
+curl http://localhost:3000                   # Web interface
 curl http://localhost:5001/health           # API health
 ```
 
-### Browser Automation
+### Browser Automation & Testing
 
 ```bash
-# Persistent browser with Hebrew configuration
-npm run browser                              # Primary browser command
-npm run setup                                # Install Playwright browsers
+# Hebrew-configured browser automation
+npm run browser                              # Launch persistent Hebrew browser
+npm run open-dify                           # Alternative browser launcher
+npm run setup                               # Install Playwright browsers
 
-# Testing
+# Testing suite
 npm test                                     # Run all Playwright tests
-npm run test:ui                              # Interactive test runner
-npm run test:debug                           # Debug mode
+npm run test:ui                             # Interactive test runner
+npm run test:debug                          # Debug mode with breakpoints
+```
+
+### Vertex AI Integration Testing
+
+```bash
+# Validate Vertex AI integration structure
+python validate_implementation.py
+
+# Test Vertex AI Hebrew capabilities (requires GCP credentials)
+python test_vertex_ai.py
+
+# Quick integration test without API calls
+python test_integration_structure.py
+
+# Hebrew conversation test with Vertex AI
+python quick_test_vertex_ai.py
 ```
 
 ### Multi-Agent Orchestrator
@@ -86,96 +75,137 @@ python3 -m venv agents_env
 source agents_env/bin/activate
 pip install langgraph langchain langchain-anthropic
 
-# Set API key and run
-export ANTHROPIC_API_KEY='your-key'
+# Run orchestrator with API key
+export ANTHROPIC_API_KEY='your-anthropic-api-key'
 python3 agents_orchestrator.py
 ```
 
-### GCP Deployment (Planned)
+## Architecture Understanding
 
-```bash
-# Authentication and project setup
-gcloud auth login
-gcloud config set project lionspace
+### Vertex AI Integration Layer
+The project includes a complete Vertex AI integration with three main components:
 
-# Build and deploy (using Cloud Build)
-gcloud builds submit --config cloudbuild-api.yaml
+1. **vertex_ai_provider.py**: Core Vertex AI provider with Hebrew text detection and RTL optimization
+2. **dify_vertex_ai_integration.py**: Dify compatibility layer that bridges Vertex AI with Dify's model provider architecture
+3. **Automated Hebrew Enhancement**: Detects Hebrew text (Unicode \u0590-\u05FF) and automatically enhances prompts with Hebrew-specific instructions
+
+### Multi-Agent System Architecture
+- **State Management**: Shared TypedDict maintaining conversation context across agents
+- **Agent Roles**: Planner (strategy), Researcher (analysis), Coder (implementation), Reviewer (validation)
+- **LangGraph Workflow**: Conditional routing based on task complexity and agent expertise
+- **Hebrew Context**: All agents understand Hebrew requirements and RTL layout principles
+
+### Browser Automation Framework
+- **Persistent Sessions**: Maintains state between test runs using Playwright's browser server
+- **Hebrew Locale**: Automatic he-IL configuration with RTL layout testing
+- **Visual Tracking**: Updates `project-tracker.html` with Hebrew progress indicators
+- **Dify Integration**: Automated navigation and setup of Dify admin interface
+
+## Critical Configuration Files
+
+### Docker Environment (`docker-compose.dev.yaml`)
+Contains Hebrew-optimized environment variables:
+```yaml
+LANG: he_IL.UTF-8
+LC_ALL: he_IL.UTF-8
+GOOGLE_VERTEX_PROJECT: lionspace
+GOOGLE_VERTEX_LOCATION: us-east1
 ```
 
-## Critical Development Guidelines
+### Browser Configuration (`playwright.config.js`)
+Hebrew locale settings:
+```javascript
+locale: 'he-IL'
+timezoneId: 'Asia/Jerusalem' 
+```
 
-### Browser Management
-- **NEVER use `open` command** - always use `npm run browser`
-- **Persistent sessions**: Browser maintains state between runs
-- **Hebrew configuration**: Automatic RTL layout and he-IL locale
-- **Automation scripts**: Located in root directory (open-dify.js, test-browser.js, etc.)
+### Progress Tracking (`project-tracker.html`)
+RTL Hebrew dashboard with:
+- Visual timeline with completion status
+- Hebrew task descriptions
+- Color-coded progress indicators
+- Statistics tracking
 
-### Progress Tracking
-- **Mandatory updates**: Always update `project-tracker.html` after tasks
-- **Visual timeline**: Shows completed/in-progress/pending tasks
-- **RTL Hebrew**: All tracking in Hebrew with proper text direction
-- **Status indicators**: Color-coded progress with completion statistics
+## Development Workflow Requirements
 
-### Code Architecture
+### Mandatory Updates
+- **Always update `project-tracker.html`** after completing tasks
+- **Use Hebrew language** for all progress descriptions and documentation
+- **Test RTL layout** for any UI changes
+- **Validate Hebrew text processing** in Vertex AI responses
 
-#### Multi-Agent System
-- **State Management**: Shared TypedDict with context preservation
-- **Agent Specialization**: Each agent has distinct responsibilities
-- **LangGraph Integration**: Workflow orchestration with conditional routing
-- **Claude Integration**: Using Claude Sonnet for reasoning tasks
+### Browser Management Protocol
+- **NEVER use `open` command** - always use `npm run browser` 
+- **Persistent browser sessions** - browser maintains state across runs
+- **Hebrew configuration** - automatic RTL and he-IL locale applied
+- **State preservation** - login sessions and navigation state maintained
 
-#### Deployment Configuration
-- **Hebrew Database**: Custom collation support for RTL text
-- **Environment Separation**: Development vs production configurations  
-- **Security First**: All credentials via Secret Manager
-- **Scalable Design**: Cloud Run auto-scaling with Cloud SQL connection pooling
+### Testing Requirements
+- **Structure validation**: Run `python test_integration_structure.py` before commits
+- **Hebrew text testing**: Verify Hebrew input/output in all components  
+- **Vertex AI validation**: Test Hebrew enhancement with `python quick_test_vertex_ai.py`
+- **Browser automation**: All changes must pass Playwright Hebrew locale tests
 
-## File Structure Understanding
+## Vertex AI Hebrew Features
 
-### Root Level Files
-- `agents_orchestrator.py`: Main multi-agent system
-- `project-tracker.html`: Visual progress tracking (Hebrew RTL)
-- `start-dev.sh`: Automated development environment setup
-- `docker-compose.dev.yaml`: Development container configuration
-- `playwright.config.js`: Browser automation configuration (Hebrew locale)
+### Automatic Hebrew Detection
+The integration automatically detects Hebrew text using Unicode ranges and enhances prompts:
 
-### Key Directories
-- `dify/`: Full Dify.ai platform source code
-- `scripts/`: Database initialization and automation scripts
-- `docs/`: Architecture documentation and deployment guides
-- `screenshots/`: Visual documentation of setup process
-- `configs/`: Configuration files for various services
+```python
+# Input: "מה זה Dify.ai?"
+# Enhanced prompt includes:
+"""אנא השב בעברית בצורה ברורה ומדויקת. 
+שים לב לכיווניות הטקסט (RTL) ולתקינות הדקדוק העברי.
 
-### Browser Automation Scripts
-- `open-dify.js`: Main browser launcher with Hebrew configuration
-- `test-browser.js`: Comprehensive testing suite
-- `complete-setup.js`: Automated Dify initial setup
-- `install-dify.js`: Installation verification scripts
+מה זה Dify.ai?"""
+```
 
-## Project-Specific Conventions
+### Supported Models
+- **gemini-pro**: Advanced reasoning with Hebrew optimization
+- **gemini-flash**: Fast responses with Hebrew RTL support
 
-### Language and Localization
-- **Primary Language**: Hebrew (עברית) for all documentation and UI
-- **RTL Support**: Proper right-to-left layout throughout
-- **Timezone**: Asia/Jerusalem for all date/time operations
-- **Character Encoding**: UTF-8 with Hebrew font family preferences
+### Configuration Options
+All model parameters support Hebrew context:
+- Temperature control for Hebrew coherence
+- Token limits optimized for Hebrew text length
+- Safety settings adapted for Hebrew content
 
-### Database Configuration
-- **PostgreSQL**: Version 15+ with pgvector extension
-- **Hebrew Collation**: Proper sorting and comparison for Hebrew text
-- **Connection Pooling**: Optimized for Cloud SQL integration
-- **Migration Strategy**: Version-controlled schema updates
+## Security and Credentials
 
-### Development Workflow
-- **One Step at a Time**: Incremental development approach
-- **Visual Feedback**: HTML progress tracker must be updated
-- **Automation First**: Prefer automated solutions over manual processes
-- **Testing Required**: All changes must include browser automation tests
+### Environment Variables Required
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+GOOGLE_VERTEX_PROJECT=your-gcp-project-id  
+GOOGLE_VERTEX_LOCATION=us-east1
+ANTHROPIC_API_KEY=your-anthropic-key
+```
 
-### Security Considerations
-- **No Hardcoded Secrets**: All credentials via environment variables
-- **Secure Defaults**: Production-ready security configurations
-- **Access Control**: RBAC implementation with proper role separation
-- **Audit Trail**: Comprehensive logging for security monitoring
+### GCP Service Account Permissions
+Required roles for Vertex AI integration:
+- `roles/aiplatform.user` - Vertex AI access
+- `roles/storage.objectViewer` - Model access  
+- `roles/serviceusage.serviceUsageConsumer` - API usage
 
-This project represents a comprehensive autonomous deployment system with strong Hebrew language support and modern cloud-native architecture.
+## File Organization
+
+### Core Integration Files
+- `vertex_ai_provider.py` - Core Vertex AI provider with Hebrew support
+- `dify_vertex_ai_integration.py` - Dify compatibility layer
+- `agents_orchestrator.py` - Multi-agent coordination system
+
+### Testing and Validation
+- `test_vertex_ai.py` - Comprehensive Vertex AI tests
+- `validate_implementation.py` - Code structure validation
+- `quick_test_vertex_ai.py` - Hebrew conversation testing
+
+### Browser Automation
+- `open-dify.js` - Hebrew-configured browser launcher
+- `test-browser.js` - Comprehensive browser testing suite
+- `complete-setup.js` - Automated Dify admin setup
+
+### Documentation
+- `VERTEX_AI_SETUP.md` - Complete Vertex AI setup guide
+- `IMPLEMENTATION_SUMMARY.md` - Technical implementation details
+- `project-tracker.html` - Visual Hebrew progress dashboard
+
+This project represents a complete autonomous deployment system with advanced Hebrew language support and production-ready Vertex AI integration.
