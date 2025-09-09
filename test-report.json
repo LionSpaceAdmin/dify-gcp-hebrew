@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-09-08T21:27:06.094Z",
+  "duration": "1 seconds",
+  "summary": {
+    "total": 7,
+    "passed": 0,
+    "failed": 7,
+    "warnings": 0,
+    "success_rate": 0
+  },
+  "results": [
+    {
+      "test": "Project Tracker",
+      "status": "fail",
+      "message": "שגיאה: page.goto: net::ERR_FILE_NOT_FOUND at file:///Users/davidlions/Desktop/%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%A1%D7%95%D7%9B%D7%A0%D7%99%D7%9D/dify-gcp-deployment/project-tracker.html\nCall log:\n\u001b[2m  - navigating to \"file:///Users/davidlions/Desktop/%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%A1%D7%95%D7%9B%D7%A0%D7%99%D7%9D/dify-gcp-deployment/project-tracker.html\", waiting until \"load\"\u001b[22m\n",
+      "timestamp": "2025-09-08T21:27:05.780Z",
+      "screenshot": null
+    },
+    {
+      "test": "Docker Service: db",
+      "status": "fail",
+      "message": "שירות לא פועל",
+      "timestamp": "2025-09-08T21:27:06.010Z",
+      "screenshot": null
+    },
+    {
+      "test": "Docker Service: redis",
+      "status": "fail",
+      "message": "שירות לא פועל",
+      "timestamp": "2025-09-08T21:27:06.010Z",
+      "screenshot": null
+    },
+    {
+      "test": "Dify Web UI",
+      "status": "fail",
+      "message": "שירות לא פועל - חיבור נדחה",
+      "timestamp": "2025-09-08T21:27:06.026Z",
+      "screenshot": null
+    },
+    {
+      "test": "Dify API",
+      "status": "fail",
+      "message": "שירות לא פועל - חיבור נדחה",
+      "timestamp": "2025-09-08T21:27:06.062Z",
+      "screenshot": null
+    },
+    {
+      "test": "Dify API Health",
+      "status": "fail",
+      "message": "שירות לא פועל - חיבור נדחה",
+      "timestamp": "2025-09-08T21:27:06.078Z",
+      "screenshot": null
+    },
+    {
+      "test": "Swagger UI",
+      "status": "fail",
+      "message": "שירות לא פועל - חיבור נדחה",
+      "timestamp": "2025-09-08T21:27:06.093Z",
+      "screenshot": null
+    }
+  ]
+}

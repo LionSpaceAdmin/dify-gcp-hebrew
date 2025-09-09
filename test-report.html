@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דוח בדיקות Dify Hebrew/Vertex AI</title>
+    <style>
+        body { font-family: Arial, Hebrew; direction: rtl; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .header { text-align: center; border-bottom: 2px solid #007acc; padding-bottom: 20px; }
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .test-result { margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 4px solid; }
+        .pass { background: #d5f4e6; border-color: #27ae60; }
+        .fail { background: #ffeaa7; border-color: #e17055; }
+        .warning { background: #fdcb6e; border-color: #f39c12; }
+        .timestamp { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 דוח בדיקות מערכת Dify</h1>
+            <p class="timestamp">נוצר: 9.9.2025, 0:27:06</p>
+        </div>
+        
+        <div class="summary">
+            <div class="stat-card">
+                <h3>7</h3>
+                <p>סה"כ בדיקות</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #27ae60, #2d3436);">
+                <h3>0</h3>
+                <p>עברו בהצלחה</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #e17055, #2d3436);">
+                <h3>7</h3>
+                <p>נכשלו</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #2d3436);">
+                <h3>0%</h3>
+                <p>שיעור הצלחה</p>
+            </div>
+        </div>
+
+        <div class="results">
+            
+                <div class="test-result fail">
+                    <h4>Project Tracker</h4>
+                    <p>שגיאה: page.goto: net::ERR_FILE_NOT_FOUND at file:///Users/davidlions/Desktop/%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%A1%D7%95%D7%9B%D7%A0%D7%99%D7%9D/dify-gcp-deployment/project-tracker.html
+Call log:
+[2m  - navigating to "file:///Users/davidlions/Desktop/%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%A1%D7%95%D7%9B%D7%A0%D7%99%D7%9D/dify-gcp-deployment/project-tracker.html", waiting until "load"[22m
+</p>
+                    <small class="timestamp">9.9.2025, 0:27:05</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Docker Service: db</h4>
+                    <p>שירות לא פועל</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Docker Service: redis</h4>
+                    <p>שירות לא פועל</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Dify Web UI</h4>
+                    <p>שירות לא פועל - חיבור נדחה</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Dify API</h4>
+                    <p>שירות לא פועל - חיבור נדחה</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Dify API Health</h4>
+                    <p>שירות לא פועל - חיבור נדחה</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+                <div class="test-result fail">
+                    <h4>Swagger UI</h4>
+                    <p>שירות לא פועל - חיבור נדחה</p>
+                    <small class="timestamp">9.9.2025, 0:27:06</small>
+                </div>
+            
+        </div>
+    </div>
+</body>
+</html>

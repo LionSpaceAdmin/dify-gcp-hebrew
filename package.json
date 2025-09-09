@@ -1,0 +1,25 @@
+{
+  "name": "dify-gcp-deployment",
+  "version": "1.0.0",
+  "description": "**מצב פרויקט:** בתהליך פיתוח אוטונומי   **סוכן:** AUTONOMOUS_DEPLOYMENT_AGENT   **מטרה:** הקמה מלאה של תשתית Dify.ai ברמת פרודקשן על Google Cloud Platform",
+  "main": "test-browser.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "open-dify": "node open-dify.js",
+    "browser": "node open-dify.js",
+    "setup": "npx playwright install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@playwright/test": "^1.55.0",
+    "playwright": "^1.55.0"
+  }
+}

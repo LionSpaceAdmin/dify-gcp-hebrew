@@ -1,0 +1,204 @@
+version: '3.8'
+
+services:
+  # Database with Hebrew collation support
+  db:
+    image: postgres:15-alpine
+    container_name: dify-db-hebrew
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: difyai123456
+      POSTGRES_USER: postgres
+      POSTGRES_DB: dify
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./scripts/init-hebrew-db.sql:/docker-entrypoint-initdb.d/init-hebrew-db.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+    networks:
+      - dify
+  
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    container_name: dify-redis
+    restart: unless-stopped
+    command: redis-server --requirepass difyai123456 --appendonly yes
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+    networks:
+      - dify
+
+  # Dify API (Backend)
+  api:
+    build:
+      context: ./dify
+      dockerfile: api/Dockerfile
+      target: base
+    container_name: dify-api-hebrew
+    restart: unless-stopped
+    environment:
+      MODE: api
+      SECRET_KEY: sk-dify-gcp-hebrew-demo
+      DB_USERNAME: postgres
+      DB_PASSWORD: difyai123456
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: difyai123456
+      CELERY_BROKER_URL: redis://:difyai123456@redis:6379/1
+      # Hebrew/RTL support
+      LANG: he_IL.UTF-8
+      LC_ALL: he_IL.UTF-8
+      # Google Cloud/Vertex AI
+      GOOGLE_APPLICATION_CREDENTIALS: /app/gcp-key.json
+      GOOGLE_VERTEX_PROJECT: lionspace
+      GOOGLE_VERTEX_LOCATION: us-east1
+      # Development settings
+      LOG_LEVEL: DEBUG
+      DEBUG: true
+      FLASK_DEBUG: true
+      # Vector DB
+      VECTOR_STORE: pgvector
+      PGVECTOR_HOST: db
+      PGVECTOR_PORT: 5432
+      PGVECTOR_USER: postgres
+      PGVECTOR_PASSWORD: difyai123456
+      PGVECTOR_DATABASE: dify
+    volumes:
+      - ./dify/api:/app/api
+      - ./data/app-storage:/app/storage
+      - ~/.config/gcloud:/app/.config/gcloud:ro
+    ports:
+      - "5001:5001"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dify
+    command: >
+      sh -c "
+        echo 'Starting Dify API with Hebrew/Vertex AI support...' &&
+        flask db upgrade &&
+        python -m gunicorn --bind 0.0.0.0:5001 --workers 1 --timeout 200 --preload --access-logfile - --error-logfile - app:app
+      "
+
+  # Dify Worker (Background Jobs)
+  worker:
+    build:
+      context: ./dify
+      dockerfile: api/Dockerfile
+      target: base
+    container_name: dify-worker-hebrew
+    restart: unless-stopped
+    environment:
+      MODE: worker
+      SECRET_KEY: sk-dify-gcp-hebrew-demo
+      DB_USERNAME: postgres
+      DB_PASSWORD: difyai123456
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: dify
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: difyai123456
+      CELERY_BROKER_URL: redis://:difyai123456@redis:6379/1
+      # Hebrew/RTL support
+      LANG: he_IL.UTF-8
+      LC_ALL: he_IL.UTF-8
+      # Google Cloud/Vertex AI
+      GOOGLE_APPLICATION_CREDENTIALS: /app/gcp-key.json
+      GOOGLE_VERTEX_PROJECT: lionspace
+      GOOGLE_VERTEX_LOCATION: us-east1
+      # Vector DB
+      VECTOR_STORE: pgvector
+      PGVECTOR_HOST: db
+      PGVECTOR_PORT: 5432
+      PGVECTOR_USER: postgres
+      PGVECTOR_PASSWORD: difyai123456
+      PGVECTOR_DATABASE: dify
+    volumes:
+      - ./dify/api:/app/api
+      - ./data/app-storage:/app/storage
+      - ~/.config/gcloud:/app/.config/gcloud:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dify
+    command: >
+      sh -c "
+        echo 'Starting Dify Worker with Hebrew/Vertex AI support...' &&
+        python -m celery -A app.celery worker --loglevel=DEBUG --concurrency=1
+      "
+
+  # Dify Web (Frontend)
+  web:
+    build:
+      context: ./dify
+      dockerfile: web/Dockerfile
+      target: base
+    container_name: dify-web-hebrew
+    restart: unless-stopped
+    environment:
+      CONSOLE_API_URL: http://api:5001
+      APP_API_URL: http://api:5001
+      NEXT_TELEMETRY_DISABLED: 1
+      # Hebrew/RTL support
+      NEXT_I18N_SUPPORT: true
+      DEFAULT_LOCALE: he
+    volumes:
+      - ./dify/web:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - dify
+    command: >
+      sh -c "
+        echo 'Starting Dify Web with Hebrew support...' &&
+        npm run dev
+      "
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: dify-nginx-hebrew
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - api
+      - web
+    networks:
+      - dify
+
+networks:
+  dify:
+    driver: bridge
+
+volumes:
+  db_data:
+  redis_data:
+  app_storage:
