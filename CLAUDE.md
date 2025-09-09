@@ -6,142 +6,176 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Autonomous Dify.ai Deployment on Google Cloud Platform**
 
-This project deploys Dify.ai (an open-source LLM application platform) on Google Cloud Platform with:
-- Vertex AI integration (Gemini models)
-- Hebrew language support with RTL layout
-- Autonomous deployment pipeline
-- Multi-agent orchestration system
-- Persistent browser automation
+This project deploys Dify.ai (an open-source LLM application platform) on Google Cloud Platform with Hebrew language support and Vertex AI integration. It combines:
 
-The repository contains multiple deployment approaches:
-- `dify-gcp-deployment/`: Docker-based deployment with Playwright automation
-- `dify-direct/`: Direct macOS installation with uv package management
-- Multi-agent orchestrator system with LangGraph
+- **Primary Goal**: Full production deployment of Dify.ai on GCP with Hebrew RTL support
+- **Multi-Agent System**: LangGraph-based orchestrator with 4 specialized agents (Planner, Researcher, Coder, Reviewer)
+- **Deployment Approaches**: Both Docker-based containerization and direct macOS installation
+- **Automation**: Playwright browser automation with persistent Hebrew-configured sessions
+- **Progress Tracking**: HTML-based visual tracking system with RTL Hebrew layout
 
 ## Architecture
 
-### Core Components
-1. **Dify Backend API** (`dify-direct/api/`): Python Flask application with Domain-Driven Design
-2. **Dify Frontend** (`dify-direct/web/`): Next.js 15 with TypeScript and React 19
-3. **Multi-Agent Orchestrator** (`agents_orchestrator.py`): LangGraph-based coordination system
-4. **Project Tracker** (`project-tracker.html`): Hebrew RTL progress tracking interface
+The project employs a multi-layered architecture:
 
-### GCP Integration
-- **Vertex AI**: Primary LLM provider (Gemini models)
-- **Cloud Run**: Container deployment target
-- **Cloud SQL**: PostgreSQL with pgvector for embeddings
-- **Secret Manager**: Credential management
-- **Cloud Storage**: File and document storage
+### Core Components
+1. **Dify Platform** (`dify/` directory): Full Dify.ai source code
+   - Backend API: Python Flask with Domain-Driven Design
+   - Frontend Web: Next.js with TypeScript and Hebrew i18n
+   - Database: PostgreSQL with pgvector extension for embeddings
+   - Cache/Queue: Redis for session management and background jobs
+
+2. **Multi-Agent Orchestrator** (`agents_orchestrator.py`): 
+   - LangGraph-based workflow coordination
+   - 4 specialized agents with shared state management
+   - Anthropic Claude integration for decision making
+
+3. **Deployment Infrastructure**:
+   - Docker Compose with Hebrew database collation
+   - GCP deployment configurations (Cloud Run, Cloud SQL, Secret Manager)
+   - Terraform infrastructure as code (planned)
+
+4. **Testing & Automation**:
+   - Playwright configuration with Hebrew locale (he-IL)
+   - Persistent browser sessions with automatic Dify navigation
+   - Visual progress tracking with timeline interface
+
+### GCP Integration Strategy
+- **Vertex AI**: Primary LLM provider (Gemini Pro/Flash models)
+- **Cloud Run**: Multi-service container deployment
+- **Cloud SQL**: Managed PostgreSQL with pgvector
+- **Cloud Storage**: Document and file management
+- **Secret Manager**: Secure credential storage
+- **Cloud Armor**: WAF protection
 
 ## Development Commands
 
-### Dify Backend (Direct Installation)
-
-All Python commands use `uv` package manager:
+### Docker-Based Development
 
 ```bash
-# Start development servers
-cd dify-direct/api
-uv run --project . flask run --port 5001    # Start API server
-uv run --project . celery -A app.celery worker --loglevel=info  # Start worker
+# Start core infrastructure
+./start-dev.sh                              # Automated setup script
 
-# Database operations
-uv run --project . flask db upgrade         # Run migrations
-uv run --project . flask db migrate         # Create migration
+# Manual service management
+docker-compose -f docker-compose.dev.yaml up -d db redis  # Core services
+docker-compose -f docker-compose.dev.yaml up -d           # All services
 
-# Testing
-uv run --project . pytest                   # Run all tests
-uv run --project . pytest tests/unit_tests/ # Unit tests only
-
-# Code quality
-uv run --project . ruff check --fix ./      # Fix linting issues
-uv run --project . ruff format ./           # Format code
+# Health checks
+curl http://localhost                        # Web interface
+curl http://localhost:5001/health           # API health
 ```
 
-### Dify Frontend
+### Browser Automation
 
 ```bash
-cd dify-direct/web
-pnpm install                # Install dependencies
-pnpm dev                    # Start development server
-pnpm build                  # Production build
-pnpm test                   # Run tests
+# Persistent browser with Hebrew configuration
+npm run browser                              # Primary browser command
+npm run setup                                # Install Playwright browsers
+
+# Testing
+npm test                                     # Run all Playwright tests
+npm run test:ui                              # Interactive test runner
+npm run test:debug                           # Debug mode
 ```
 
 ### Multi-Agent Orchestrator
 
 ```bash
-# Activate virtual environment
+# Setup virtual environment
+python3 -m venv agents_env
 source agents_env/bin/activate
+pip install langgraph langchain langchain-anthropic
 
-# Set API key
-export ANTHROPIC_API_KEY='your-key-here'
-
-# Run orchestrator
+# Set API key and run
+export ANTHROPIC_API_KEY='your-key'
 python3 agents_orchestrator.py
 ```
 
-### GCP Deployment
+### GCP Deployment (Planned)
 
 ```bash
-# Set up GCP authentication
+# Authentication and project setup
 gcloud auth login
 gcloud config set project lionspace
 
-# Deploy to Cloud Run
-gcloud run deploy dify-api --source=dify-direct/api --region=us-east1
-gcloud run deploy dify-web --source=dify-direct/web --region=us-east1
+# Build and deploy (using Cloud Build)
+gcloud builds submit --config cloudbuild-api.yaml
 ```
 
-## MCP Server Configuration
+## Critical Development Guidelines
 
-The project uses Model Context Protocol (MCP) servers configured in `.mcp.json`:
+### Browser Management
+- **NEVER use `open` command** - always use `npm run browser`
+- **Persistent sessions**: Browser maintains state between runs
+- **Hebrew configuration**: Automatic RTL layout and he-IL locale
+- **Automation scripts**: Located in root directory (open-dify.js, test-browser.js, etc.)
 
-### Persistent Browser Automation
-- **Puppeteer MCP Server**: Provides persistent browser automation
-- **Configuration**: `.claude/browser-config.json` with Dify credentials
-- **User Data**: Persistent browser profile in `.claude/browser-data/`
+### Progress Tracking
+- **Mandatory updates**: Always update `project-tracker.html` after tasks
+- **Visual timeline**: Shows completed/in-progress/pending tasks
+- **RTL Hebrew**: All tracking in Hebrew with proper text direction
+- **Status indicators**: Color-coded progress with completion statistics
 
-### GCP Tools Integration
-- **Google Cloud MCP Server**: Provides GCP service integration
-- **Service Account**: `.claude/gcp-service-account.json`
-- **Configuration**: `.claude/gcp-config.json` with project settings
+### Code Architecture
 
-## Important Notes
+#### Multi-Agent System
+- **State Management**: Shared TypedDict with context preservation
+- **Agent Specialization**: Each agent has distinct responsibilities
+- **LangGraph Integration**: Workflow orchestration with conditional routing
+- **Claude Integration**: Using Claude Sonnet for reasoning tasks
 
-### Development Workflow
-- **Language**: Work primarily in Hebrew (עברית)
-- **Approach**: One step at a time, avoid assumptions
-- **Progress Tracking**: Update `project-tracker.html` after each task
-- **Browser Management**: Never use `open` command; use persistent MCP browser only
+#### Deployment Configuration
+- **Hebrew Database**: Custom collation support for RTL text
+- **Environment Separation**: Development vs production configurations  
+- **Security First**: All credentials via Secret Manager
+- **Scalable Design**: Cloud Run auto-scaling with Cloud SQL connection pooling
 
-### Database Setup
-- **Local PostgreSQL**: Running on default port with `dify` database
-- **Admin Account**: `admin@dify.local` / `LionSpace2024!`
-- **Vertex AI**: Pre-configured with 3 models (gemini-1.5-pro, gemini-1.5-flash, text-embedding-004)
+## File Structure Understanding
 
-### Testing Guidelines
-- Use `pytest` for Python backend testing
-- Use `pnpm test` for frontend testing
-- Automated browser testing via MCP Puppeteer server
-- Always test Vertex AI integration after changes
+### Root Level Files
+- `agents_orchestrator.py`: Main multi-agent system
+- `project-tracker.html`: Visual progress tracking (Hebrew RTL)
+- `start-dev.sh`: Automated development environment setup
+- `docker-compose.dev.yaml`: Development container configuration
+- `playwright.config.js`: Browser automation configuration (Hebrew locale)
 
-### Code Style
-- **Python**: Use `uv` package manager, type hints required, follow Domain-Driven Design
-- **TypeScript**: Strict configuration, avoid `any` type
-- **Internationalization**: Hebrew RTL support with proper locale handling
+### Key Directories
+- `dify/`: Full Dify.ai platform source code
+- `scripts/`: Database initialization and automation scripts
+- `docs/`: Architecture documentation and deployment guides
+- `screenshots/`: Visual documentation of setup process
+- `configs/`: Configuration files for various services
 
-### Deployment Pipeline
-Current status: 12/16 tasks completed
-- ✅ Local Dify installation with Vertex AI
-- ✅ Persistent browser automation setup
-- ⏳ Full functionality testing with Vertex AI
-- 🔄 Next: GCP secrets management and cloud deployment
+### Browser Automation Scripts
+- `open-dify.js`: Main browser launcher with Hebrew configuration
+- `test-browser.js`: Comprehensive testing suite
+- `complete-setup.js`: Automated Dify initial setup
+- `install-dify.js`: Installation verification scripts
 
 ## Project-Specific Conventions
 
-- All async tasks use Celery with Redis as broker
-- Vector databases use pgvector extension for PostgreSQL
-- Model providers managed through Dify's provider system
-- Hebrew language support throughout the interface
-- Autonomous deployment with minimal manual intervention
+### Language and Localization
+- **Primary Language**: Hebrew (עברית) for all documentation and UI
+- **RTL Support**: Proper right-to-left layout throughout
+- **Timezone**: Asia/Jerusalem for all date/time operations
+- **Character Encoding**: UTF-8 with Hebrew font family preferences
+
+### Database Configuration
+- **PostgreSQL**: Version 15+ with pgvector extension
+- **Hebrew Collation**: Proper sorting and comparison for Hebrew text
+- **Connection Pooling**: Optimized for Cloud SQL integration
+- **Migration Strategy**: Version-controlled schema updates
+
+### Development Workflow
+- **One Step at a Time**: Incremental development approach
+- **Visual Feedback**: HTML progress tracker must be updated
+- **Automation First**: Prefer automated solutions over manual processes
+- **Testing Required**: All changes must include browser automation tests
+
+### Security Considerations
+- **No Hardcoded Secrets**: All credentials via environment variables
+- **Secure Defaults**: Production-ready security configurations
+- **Access Control**: RBAC implementation with proper role separation
+- **Audit Trail**: Comprehensive logging for security monitoring
+
+This project represents a comprehensive autonomous deployment system with strong Hebrew language support and modern cloud-native architecture.
