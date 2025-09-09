@@ -1,0 +1,32 @@
+# Dockerfile עבור Dify Web Frontend
+FROM node:20-alpine
+
+# הגדרת ספרייה לעבודה
+WORKDIR /app
+
+# העתקת קבצי package
+COPY dify-direct/web/package*.json ./
+COPY dify-direct/web/pnpm-lock.yaml ./
+
+# התקנת pnpm
+RUN npm install -g pnpm
+
+# התקנת תלויות
+RUN pnpm install --frozen-lockfile
+
+# העתקת שאר הקבצים
+COPY dify-direct/web .
+
+# הגדרת משתני סביבה
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_PREFIX=https://dify-api-lionspace.run.app
+ENV NEXT_PUBLIC_PUBLIC_API_PREFIX=https://dify-api-lionspace.run.app
+
+# בניית האפליקציה
+RUN pnpm build
+
+# חשיפת פורט
+EXPOSE 3000
+
+# הפעלת האפליקציה
+CMD ["pnpm", "start"]

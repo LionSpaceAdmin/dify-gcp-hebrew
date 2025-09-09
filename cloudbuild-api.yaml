@@ -1,0 +1,10 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/lionspace/dify-api', '-f', 'Dockerfile.api', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/lionspace/dify-api']
+
+images:
+  - 'gcr.io/lionspace/dify-api'
+
+timeout: '1200s'
