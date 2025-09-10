@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "persistent-browser": {
+      "command": "npx",
+      "args": ["-y", "puppeteer-mcp-claude"],
+      "env": {
+        "BROWSER_HEADLESS": "false",
+        "BROWSER_PERSISTENT": "true",
+        "BROWSER_DEFAULT_URL": "http://localhost:3000",
+        "BROWSER_VIEWPORT_WIDTH": "1920",
+        "BROWSER_VIEWPORT_HEIGHT": "1080",
+        "BROWSER_USER_DATA_DIR": "/Users/davidlions/Desktop/פרויקט סוכנים/.claude/browser-data",
+        "BROWSER_CONFIG_PATH": "/Users/davidlions/Desktop/פרויקט סוכנים/.claude/browser-config.json",
+        "BROWSER_AUTO_LOGIN": "true",
+        "BROWSER_SAVE_SESSION": "true"
+      }
+    },
+    "gcp-tools": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-server"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/Users/davidlions/Desktop/פרויקט סוכנים/.claude/gcp-service-account.json",
+        "GOOGLE_CLOUD_PROJECT": "lionspace",
+        "GCP_CONFIG_PATH": "/Users/davidlions/Desktop/פרויקט סוכנים/.claude/gcp-config.json",
+        "GCP_DEFAULT_REGION": "us-east1",
+        "GCP_DEFAULT_ZONE": "us-east1-b"
+      }
+    }
+  }
+}
